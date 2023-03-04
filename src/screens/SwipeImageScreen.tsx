@@ -24,10 +24,16 @@ export const SwipeImageScreen = ({ route }: Props) => {
         horizontal
         pagingEnabled
         initialScrollIndex={index}
+        getItemLayout={(_, index) => ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
         data={testdata}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
+            activeOpacity={1}
             onPress={() => {
               setCount(count + 1);
             }}
@@ -36,7 +42,9 @@ export const SwipeImageScreen = ({ route }: Props) => {
           </TouchableOpacity>
         )}
       />
-      <Text>count: {count}</Text>
+      <Text>
+        index: {index} count: {count}
+      </Text>
     </SafeAreaView>
   );
 };

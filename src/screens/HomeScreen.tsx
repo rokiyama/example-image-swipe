@@ -1,19 +1,39 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { testdata } from "../testdata";
 import { RootStackParamList } from "../types/navigation";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export const HomeScreen = ({ navigation }: Props) => {
+  const { width } = useWindowDimensions();
   return (
     <View style={styles.container}>
-      <Text
-        onPress={() => {
-          navigation.push("SwipeImage", { index: 0 });
-        }}
-      >
-        Open up App.tsx to start working on your app!
-      </Text>
+      <FlatList
+        numColumns={3}
+        data={testdata}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) => (
+          <TouchableOpacity
+            onPress={() => {
+              navigation.push("SwipeImage", { index });
+            }}
+          >
+            <Image
+              style={{ width: width / 3, height: width / 3 }}
+              source={{ uri: item.url }}
+            />
+          </TouchableOpacity>
+        )}
+      />
     </View>
   );
 };
