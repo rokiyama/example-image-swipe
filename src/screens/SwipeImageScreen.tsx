@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -8,16 +8,34 @@ import {
   Text,
   TouchableOpacity,
   useWindowDimensions,
+  ViewToken,
 } from "react-native";
 import { testdata } from "../testdata";
 import { RootStackParamList } from "../types/navigation";
 
 type Props = NativeStackScreenProps<RootStackParamList, "SwipeImage">;
 
+type onViewableItemsChanged =
+  | ((info: {
+      viewableItems: Array<ViewToken>;
+      changed: Array<ViewToken>;
+    }) => void)
+  | null
+  | undefined;
+
 export const SwipeImageScreen = ({ route }: Props) => {
   const { index } = route.params;
   const { width, height } = useWindowDimensions();
   const [count, setCount] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(index);
+  const [isSwiping, setIsSwiping] = useState(false);
+  // https://github.com/facebook/react-native/issues/30171
+  const onViewableItemsChanged = useRef<onViewableItemsChanged>(
+    ({ viewableItems }) => {
+      if (viewableItems.length < 1 || !viewableItems[0].index) return;
+      setCurrentIndex(viewableItems[0].index);
+    }
+  );
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -29,6 +47,9 @@ export const SwipeImageScreen = ({ route }: Props) => {
           offset: width * index,
           index,
         })}
+        onViewableItemsChanged={onViewableItemsChanged.current}
+        onScrollBeginDrag={() => setIsSwiping(true)}
+        onScrollEndDrag={() => setIsSwiping(false)}
         data={testdata}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -43,7 +64,8 @@ export const SwipeImageScreen = ({ route }: Props) => {
         )}
       />
       <Text>
-        index: {index} count: {count}
+        index:{index} currentIndex:{currentIndex} count:{count} isSwiping:
+        {String(isSwiping)}
       </Text>
     </SafeAreaView>
   );
